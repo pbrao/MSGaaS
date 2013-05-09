@@ -11,7 +11,11 @@ def main():
 	token = getToken(accessKey, secretKey, tenantID)
 	
 	numMessages = 3
-	queueName = "testqueue"
+	queueName = "newqueuei4"
+	
+	if not queueExists(queueName, tenantID, token):
+		print "Create queue"
+		createQueue(queueName, tenantID, token)
 	
 	print " "
 	print "***** Sending Messages to the Queue *****"
@@ -57,6 +61,28 @@ def getToken(accessKey, secretKey, tenantID):
 	token = resp["access"]["token"]["id"]
 	#print token
 	return token
+
+def queueExists(queueName, tenantID, token):
+	print "In queueExists"
+	endpoint = "https://region-a.geo-1.messaging.hpcloudsvc.com/v1.1/%s/queues" %tenantID
+	headers = {"content-type": "application/json", "x-auth-token": token}
+	req = requests.get(endpoint, verify=False, headers=headers)
+	resp = json.loads(req.text)
+	queues = resp["queues"]
+	for queue in queues:
+		print queue["name"]
+		if queueName == queue["name"]:
+			return True
+	return False
+	
+def createQueue(queueName, tenantID, token):
+	endpoint = "https://region-a.geo-1.messaging.hpcloudsvc.com/v1.1/%s/queues/%s" %(tenantID, queueName)
+	headers = {"content-type": "application/json", "x-auth-token": token}
+	req = requests.put(endpoint, verify=False, headers=headers)
+	print req.status_code
+	print req.text
+	print req.headers
+	
 	
 if __name__ == '__main__':
 	main()	
